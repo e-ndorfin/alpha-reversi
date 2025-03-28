@@ -11,50 +11,25 @@ class Node:
         self.value = 0.0       # Total value of this state
         # self.prior = prior  # Added prior probability from policy network
 
-    def value_calculation(self) -> Optional[float]:
-        """ 
-        Calculates the value of this node.
+    def calculate_ucb_score(self, exploration_arg: float) -> float:
         """
+        Calculates the UCB score for a child node.
+
+        Args: 
+            - exploration_arg: value that determines exploration/exploitation tradeoff 
+        """
+
+        if not self.parent:
+            raise ValueError("No parent found for this child")
+
         if self.visits == 0:
-            return 0
+            # Higher UCB is better; returning inf incentivizes the agent to choose this for exploration
+            # Usually this will not be run however as _select will directly select selfren with visits == 0
+            return float('inf')
         else:
-            return self.value / self.visits
-
-    def select_move(self, temperature: float) -> Tuple[int, int]:
-        """
-        Selects the move with the highest UCB score.
-        """
-        visits = [child.visits for child in self.children]
-
-        if temperature == 0:  # Greedy selection
-            action = self.children[np.argmax(visits)]
-        elif temperature == float('inf'):  # Random (exploratory) selection
-            action = np.random.choice(self.children)
-        else:  # Temperature-based selection
-            visit_counts = np.array([child.visits for child in self.children])
-            distribution = visit_counts ** (1 / temperature)
-            distribution = distribution / distribution.sum()
-            action = np.random.choice(len(self.children), p=distribution)
-
-        return self.children[action]
-
-    def best_child(self) -> 'Node':
-        """
-        Select child with highest UCB score.
-        """
-        if not self.children:
-            raise ValueError("Node has no children")
-        return max(self.children, key=lambda c: c.ucb_score(self, c))
-
-    # def expand(self, state: np.ndarray, to_play: int, action_probs: List[float]) -> 'Node':
-    #     """
-    #     We expand a node and keep track of the prior policy probability given by neural network
-    #     """
-    #     self.to_play = to_play
-    #     self.state = state
-    #     for a, prob in enumerate(action_probs):
-    #         if prob != 0:
-    #             self.children[a] = Node(prior=prob, to_play=self.to_play * -1)
+            return self.value / self.visits \
+                + exploration_arg * \
+                np.sqrt(np.log(self.parent.visits) / self.visits)
 
     def __repr__(self):
         """
