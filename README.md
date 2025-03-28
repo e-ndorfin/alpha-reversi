@@ -11,19 +11,14 @@
 ## Phase 2: Basic MCTS AI Implementation
 1. **Core MCTS Components**
    - [x] Complete _select() method in mcts.py
-   - [ ] Implement _expand() with random move selection
-   - [ ] Create _simulate() with random rollouts
-   - [ ] Add _backpropagate() for value updates
-   - [ ] Basic Node structure enhancements:
-     - [ ] Store game state in nodes
-     - [ ] Implement UCB calculation
-     - [ ] Add move selection logic
+   - [x] Implement _expand() with random move selection
+   - [x] Create _simulate() with random rollouts
+   - [x] Add _backpropagate() for value updates
 
 2. **AI Integration**
-   - [ ] Connect MCTS to main game loop
-   - [ ] Add basic AI vs human gameplay
+   - [x] Connect MCTS to main game loop
+   - [x] Add basic AI vs human gameplay
    - [ ] Implement time-limited searches
-   - [ ] Create benchmark scenarios
 
 ## Phase 3: Neural Network Foundation
 1. **Network Architecture**
