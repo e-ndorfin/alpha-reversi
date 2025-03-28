@@ -4,6 +4,21 @@ from copy import deepcopy
 
 
 class CheckersGame:
+    """
+    A class representing a game of Checkers.
+
+    Attributes:
+        - board (np.ndarray): An 8x8 numpy array representing the board state.
+        - current_player (int): The current player (1 for black, -1 for white).
+
+    Methods:
+        - get_valid_moves() -> List[Tuple[Tuple[int, int], List[Tuple[int, int]]]]: Returns a list of valid moves.
+        - make_move(start_pos: Tuple[int, int], moves: List[Tuple[int, int]]) -> None: Executes a move or a sequence of captures.
+        - is_game_over() -> bool: Determines if the game is over.
+        - get_winner() -> Optional[int]: Returns the winner (-1 for white, 1 for black, None if game is ongoing).
+        - get_state() -> np.ndarray: Returns a deep copy of the board state.
+    """
+
     # Board representation:
     # 0 = empty
     # 1 = black piece
@@ -152,7 +167,7 @@ class CheckersGame:
                 jumped_col = (new_col + col) // 2
                 self.board[jumped_row][jumped_col] = 0
 
-            # LAST MOVE 
+            # LAST MOVE
             if i == len(moves) - 1:  # Final position
                 # Check if piece should be kinged
                 if piece == 1 and new_row == 7:  # Black piece reaches bottom

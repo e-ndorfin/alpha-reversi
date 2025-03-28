@@ -26,12 +26,22 @@ class Node:
 
         if self.visits == 0:
             # Higher UCB is better; returning inf incentivizes the agent to choose this for exploration
-            # Usually this will not be run however as _select will directly select selfren with visits == 0
+            # Usually this will not be run however as _select will directly select children with visits == 0
             return float('inf')
         else:
             return self.value / self.visits \
                 + exploration_arg * \
                 np.sqrt(np.log(self.parent.visits) / self.visits)
+
+    def update(self, game_value: float) -> None:
+        """Updates the visit and value count of the node while backpropagating.
+
+        Args:
+            - game_value: 1.0 if win, 0.0 if loss, 0.5 if draw
+        """
+
+        self.visits += 1
+        self.value += game_value
 
     def __repr__(self):
         """

@@ -10,7 +10,7 @@
 
 ## Phase 2: Basic MCTS AI Implementation
 1. **Core MCTS Components**
-   - [ ] Complete _select() method in mcts.py
+   - [x] Complete _select() method in mcts.py
    - [ ] Implement _expand() with random move selection
    - [ ] Create _simulate() with random rollouts
    - [ ] Add _backpropagate() for value updates
