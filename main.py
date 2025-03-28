@@ -32,16 +32,28 @@ def main():
         print(f"Current player: {'Black' if game.current_player == 1 else 'White'}")
 
         if not self_play:
-            start_pos, moves = get_human_move(game)
+            if game.current_player == 1:  # Human plays as black
+                start_pos, moves = get_human_move(game)
+            else:  # AI plays as white
+                print("AI is thinking...")
+                start_pos, moves = mcts.get_best_move(iterations=1000)
+                print(f"AI move: {start_pos} -> {moves}")
+        else:
+            # Both players are AI
+            print("AI is thinking...")
+            start_pos, moves = mcts.get_best_move(iterations=1000)
+            print(f"AI move: {start_pos} -> {moves}")
 
-            game.make_move(start_pos, moves)
+        game.make_move(start_pos, moves)
 
     # Game over
     winner = game.get_winner()
     if winner == 1:
-        print("\nBlack (Human) wins!")
+        print("\nBlack wins!")
+    elif winner == -1:
+        print("\nWhite wins!")
     else:
-        print("\nWhite (AI) wins!")
+        print("\nDraw!")
 
 
 if __name__ == "__main__":

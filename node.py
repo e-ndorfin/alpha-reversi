@@ -9,6 +9,8 @@ class Node:
         self.children = []     # Legal child positions
         self.visits = 0        # Number of times this node has been visited
         self.value = 0.0       # Total value of this state
+        self.player = None     # Player at this node (1 for black, -1 for white)
+        self.move = None       # Move that led to this state (start_pos, moves)
         # self.prior = prior  # Added prior probability from policy network
 
     def calculate_ucb_score(self, exploration_arg: float) -> float:
@@ -35,5 +37,8 @@ class Node:
         """
         Debugger pretty print node info
         """
-        prior = "{0:.2f}".format(self.prior)
-        return "{} Prior: {} Count: {} Value: {}".format(self.state.__str__(), prior, self.visit_count, self.value())
+        if hasattr(self, 'prior'):
+            prior = "{0:.2f}".format(self.prior)
+            return "{} Prior: {} Count: {} Value: {}".format(self.state.__str__(), prior, self.visits, self.value)
+        else:
+            return "Count: {} Value: {}".format(self.visits, self.value)

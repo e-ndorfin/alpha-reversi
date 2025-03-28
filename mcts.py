@@ -1,5 +1,7 @@
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 import numpy as np
+import random
+from copy import deepcopy
 from game import CheckersGame
 from node import Node
 
@@ -36,44 +38,171 @@ class MCTS:
             if child.visits == 0:
                 return child
 
-        selected_child, max_ucb = node.children[0], node.children[0].ucb_score(self.exploration_arg)
+        selected_child, max_ucb = node.children[0], node.children[0].calculate_ucb_score(self.exploration_arg)
 
         for child in node.children[1:]:
-            ucb_score = child.ucb_score(child, self.exploration_arg)
+            ucb_score = child.calculate_ucb_score(self.exploration_arg)
             if ucb_score > max_ucb:
                 max_ucb = ucb_score
                 selected_child = child
 
         return selected_child
 
-    def _expand(self, node: Node) -> Node:
+    def _expand(self, node: Node) -> Optional[Node]:
         """
-        Takes in leaf node (has no children) and adds new node to node.children with random move
+        Takes in a leaf node and adds a new child node with a random valid move.
+        
+        Args:
+            - node: The leaf node to expand
+            
+        Returns:
+            - A newly created child node, or None if no expansion is possible
         """
+        # Create a temporary game state from the node's state
+        temp_game = CheckersGame()
+        temp_game.board = deepcopy(node.state)
+        temp_game.current_player = node.player
+        
+        # Get valid moves from this state
+        valid_moves = temp_game.get_valid_moves()
+        
+        if not valid_moves:
+            return None  # No valid moves, can't expand
+        
+        # Choose a random move to expand
+        start_pos, moves = random.choice(valid_moves)
+        
+        # Create a new game state by applying the move
+        new_game = deepcopy(temp_game)
+        new_game.make_move(start_pos, moves)
+        
+        # Create a new child node
+        child = Node(parent=node)
+        child.state = new_game.board
+        child.player = new_game.current_player
+        child.move = (start_pos, moves)  # Store the move that led to this state
+        
+        # Add the child to the parent's children
+        node.children.append(child)
+        
+        return child
 
-        if 
-
-        parent = node.parent
-        board_state = self.game.get_state
-        moves = self.game.get_valid_moves()
-
-
-
-
-
-
-        # TODO: Think about how to implement this. might need to add func to game.py to see next state given a current state, action and player
-
-    def _simulate(self, state: np.ndarray) -> float:
-        # TODO: Implement simulation/rollout phase
-        pass
+    def _simulate(self, node: Node) -> float:
+        """
+        Simulates a random playout from the given node until a terminal state is reached.
+        
+        Args:
+            - node: The node to start simulation from
+            
+        Returns:
+            - 1.0 if the current player wins, 0.0 if they lose, 0.5 for a draw
+        """
+        # Create a temporary game for simulation
+        temp_game = CheckersGame()
+        temp_game.board = deepcopy(node.state)
+        temp_game.current_player = node.player
+        
+        # Store the original player to determine the winner
+        original_player = node.player
+        
+        # Simulate random moves until game is over
+        while not temp_game.is_game_over():
+            valid_moves = temp_game.get_valid_moves()
+            if not valid_moves:
+                break
+                
+            # Choose a random move
+            start_pos, moves = random.choice(valid_moves)
+            temp_game.make_move(start_pos, moves)
+        
+        # Determine the result
+        winner = temp_game.get_winner()
+        
+        if winner is None:
+            return 0.5  # Draw
+        elif winner == original_player:
+            return 1.0  # Win
+        else:
+            return 0.0  # Loss
 
     def _backpropagate(self, node: Node, result: float) -> None:
-        # TODO: Implement backpropagation phase
-        pass
+        """
+        Updates the node and all its ancestors with the simulation result.
+        
+        Args:
+            - node: The node to start backpropagation from
+            - result: The simulation result (1.0 for win, 0.0 for loss, 0.5 for draw)
+        """
+        current = node
+        while current is not None:
+            current.visits += 1
+            current.value += result
+            # Flip the result for the parent node (opponent's perspective)
+            result = 1.0 - result
+            current = current.parent
 
+    def get_best_move(self, iterations: int = 1000) -> Tuple[Tuple[int, int], List[Tuple[int, int]]]:
+        """
+        Runs the MCTS algorithm for a specified number of iterations and returns the best move.
+        
+        Args:
+            - iterations: Number of MCTS iterations to run
+            
+        Returns:
+            - The best move as (start_pos, moves)
+        """
+        # Create root node with current game state
+        root = Node()
+        root.state = deepcopy(self.game.board)
+        root.player = self.game.current_player
+        
+        # Run MCTS for specified iterations
+        for _ in range(iterations):
+            self.simulation_loop(root)
+        
+        # Select the child with the most visits
+        if not root.children:
+            # If no children, return a random valid move
+            return random.choice(self.game.get_valid_moves())
+        
+        best_child = max(root.children, key=lambda child: child.visits)
+        return best_child.move
 
-    def simulation_loop(self) -> None:
-
-        # Unless reached leaf node, continue choosing 
-        pass 
+    def simulation_loop(self, root: Node) -> None:
+        """
+        Performs one iteration of the MCTS algorithm: selection, expansion, simulation, and backpropagation.
+        
+        Args:
+            - root: The root node to start the simulation from
+        """
+        # Selection: traverse the tree to find a leaf node
+        node = root
+        while node.children:
+            node = self._select(node)
+        
+        # Expansion: if the leaf node is not terminal, expand it
+        if not self.is_terminal(node):
+            child = self._expand(node)
+            if child:
+                node = child
+        
+        # Simulation: perform a random playout from the leaf node
+        result = self._simulate(node)
+        
+        # Backpropagation: update the node and its ancestors with the result
+        self._backpropagate(node, result)
+    
+    def is_terminal(self, node: Node) -> bool:
+        """
+        Checks if a node represents a terminal state (game over).
+        
+        Args:
+            - node: The node to check
+            
+        Returns:
+            - True if the node is terminal, False otherwise
+        """
+        temp_game = CheckersGame()
+        temp_game.board = deepcopy(node.state)
+        temp_game.current_player = node.player
+        return temp_game.is_game_over()
