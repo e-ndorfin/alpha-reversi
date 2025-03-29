@@ -3,6 +3,7 @@ import random
 from game import CheckersGame
 from mcts import MCTS
 from timeit import default_timer as timer
+from tqdm import tqdm
 
 class RandomAgent:
     """A simple random agent for playing Checkers."""
@@ -54,7 +55,7 @@ def evaluate_mcts_vs_random(num_simulations: int, mcts_iterations: int = 1000) -
     random_wins = 0
     draws = 0
 
-    for _ in range(num_simulations):
+    for _ in tqdm(range(num_simulations), desc="Simulating games"):
         result = simulate_game(mcts_iterations)
         if result == 1:
             mcts_wins += 1
