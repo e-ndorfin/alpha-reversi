@@ -54,13 +54,13 @@ class MCTS:
 
     def _expand(self, node: Node) -> Optional[Node]:
         """
-        Takes in a leaf node and adds a new child node with a random valid move.
+        Takes in a leaf node and adds child nodes for all valid unexpanded moves.
 
         Args:
             - node: The leaf node to expand
 
         Returns:
-            - A newly created child node, or None if no expansion is possible
+            - A randomly selected newly created child node, or None if no expansion is possible
         """
         self.state = 'expand'
         # Create a temporary game state from the node's state
@@ -70,8 +70,9 @@ class MCTS:
 
         # Get valid moves from this state
         valid_moves = temp_game.get_valid_moves()
+        new_children = []
 
-        # Iterate through valid moves and create child nodes for unexpanded moves
+        # Create child nodes for all unexpanded moves
         for move in valid_moves:
             if move not in node.moves_expanded:
                 start_pos, moves = move
@@ -85,19 +86,19 @@ class MCTS:
                 child = Node(parent=node)
                 child.state = new_game.board
                 child.player = new_game.current_player
-                # Store the move that led to this state
                 child.move = (start_pos, moves)
 
                 # Add the child to the parent's children
                 node.add_child(child)
-                node.moves_expanded.append(move) # Add move to expanded moves
+                node.moves_expanded.append(move)
+                new_children.append(child)
 
-                # print('chosen', start_pos, moves)
-
-                return child # Return the newly created child
-
-        # If all moves have been expanded, return random child
-        return random.choice(node.children)
+        # Return a random new child if any were created, otherwise return a random existing child
+        if new_children:
+            return random.choice(new_children)
+        elif node.children:
+            return random.choice(node.children)
+        return None
 
     def _simulate(self, node: Node) -> float:
         """
