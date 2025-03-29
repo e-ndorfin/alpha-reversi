@@ -4,6 +4,7 @@ import random
 from copy import deepcopy
 from game import CheckersGame
 from node import Node
+from mcts_debug import *
 
 
 class MCTS:
@@ -20,6 +21,7 @@ class MCTS:
     def __init__(self, game: CheckersGame):
         self.game = game  # NumPy checkers board defined in game.py
         self.exploration_arg = 1.414
+        self.state = '' 
 
     def _select(self, node: Node) -> Node:
         """
@@ -28,11 +30,7 @@ class MCTS:
         Args: 
             - node: current node to explore
         """
-        print('select')
-
-        temp_game = CheckersGame()
-        temp_game.board = deepcopy(node.state)
-        temp_game.current_player = node.player
+        self.state = 'select'
 
         if not node.children:
             raise ValueError("No children found in the current node")
@@ -64,7 +62,7 @@ class MCTS:
         Returns:
             - A newly created child node, or None if no expansion is possible
         """
-        print('expand')
+        self.state = 'expand'
         # Create a temporary game state from the node's state
         temp_game = CheckersGame()
         temp_game.board = deepcopy(node.state)
@@ -79,7 +77,8 @@ class MCTS:
                 start_pos, moves = move
 
                 # Create a new game state by applying the move
-                new_game = deepcopy(temp_game)
+                new_game = CheckersGame()
+                new_game.board = deepcopy(temp_game.board)
                 new_game.make_move(start_pos, moves)
 
                 # Create a new child node
@@ -91,14 +90,14 @@ class MCTS:
 
                 # Add the child to the parent's children
                 node.add_child(child)
-                node.moves_expanded.add(move) # Add move to expanded moves
+                node.moves_expanded.append(move) # Add move to expanded moves
 
-                print('chosen', start_pos, moves)
+                # print('chosen', start_pos, moves)
 
                 return child # Return the newly created child
 
-        # If all moves have been expanded, return None
-        return None
+        # If all moves have been expanded, return random child
+        return random.choice(node.children)
 
     def _simulate(self, node: Node) -> float:
         """
@@ -111,7 +110,7 @@ class MCTS:
             - 1.0 if the current player wins, 0.0 if they lose, 0.5 for a draw
         """
 
-        print('simulate')
+        self.state = 'simulate'
         # Create a temporary game for simulation
         temp_game = CheckersGame()
         temp_game.board = deepcopy(node.state)
@@ -148,7 +147,7 @@ class MCTS:
             - node: The node to start backpropagation from
             - result: The simulation result (1.0 for win, 0.0 for loss, 0.5 for draw)
         """
-        print('backpropagate')
+        self.state = 'backpropagate'
         current = node
         while current is not None:
             current.update(result)
@@ -178,13 +177,16 @@ class MCTS:
         for _ in range(iterations):
             self.simulation_loop(root)
 
+        log_tree(root)
+        save_tree_visualization(root, filename='mcts_tree')
+
         # If no children, return a random valid move
         if not root.children:
             return random.choice(self.game.get_valid_moves())
 
         # Choose child with highest visits == choosing child with highest UCT score
-        for node in root.children:
-            print(node)
+        # for node in root.children:
+        #     print(node)
 
         best_child = max(root.children, key=lambda child: child.visits)
         return best_child.move
