@@ -72,33 +72,33 @@ class MCTS:
 
         # Get valid moves from this state
         valid_moves = temp_game.get_valid_moves()
-        unexpanded = any(move in node.moves_expanded for move in valid_moves)
 
-        if unexpanded:  # If there exists unexplored moves
-            for move in valid_moves:
-                if move not in node.moves_expanded:
-                    start_pos, moves = move
-                    node.moves_expanded.add(move)
-        else:
-            start_pos, moves = random.choice(valid_moves)
+        # Iterate through valid moves and create child nodes for unexpanded moves
+        for move in valid_moves:
+            if move not in node.moves_expanded:
+                start_pos, moves = move
 
-        # Create a new game state by applying the move
-        new_game = deepcopy(temp_game)
-        new_game.make_move(start_pos, moves)
+                # Create a new game state by applying the move
+                new_game = deepcopy(temp_game)
+                new_game.make_move(start_pos, moves)
 
-        # Create a new child node
-        child = Node(parent=node)
-        child.state = new_game.board
-        child.player = new_game.current_player
-        # Store the move that led to this state
-        child.move = (start_pos, moves)
+                # Create a new child node
+                child = Node(parent=node)
+                child.state = new_game.board
+                child.player = new_game.current_player
+                # Store the move that led to this state
+                child.move = (start_pos, moves)
 
-        # Add the child to the parent's children
-        node.add_child(child)
+                # Add the child to the parent's children
+                node.add_child(child)
+                node.moves_expanded.add(move) # Add move to expanded moves
 
-        print('chosen', start_pos, moves)
+                print('chosen', start_pos, moves)
 
-        return child
+                return child # Return the newly created child
+
+        # If all moves have been expanded, return None
+        return None
 
     def _simulate(self, node: Node) -> float:
         """
@@ -202,7 +202,7 @@ class MCTS:
             node = self._select(node)
 
         # Expansion: if the leaf node is not terminal, expand it
-        if not self.is_terminal(node):
+        if not self.is_terminal(node) and len(node.moves_expanded) < len(self.game.get_valid_moves()):
             child = self._expand(node)
             if child:
                 node = child
