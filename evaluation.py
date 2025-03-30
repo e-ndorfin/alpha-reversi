@@ -17,7 +17,7 @@ class RandomAgent:
         return random.choice(valid_moves) if valid_moves else None
 
 
-def simulate_game(mcts_iterations: int = 1000) -> int:
+def simulate_game(filepath: str, mcts_iterations: int = 1000) -> int:
     """Simulates a game between the MCTS agent and a random agent.
 
     Args:
@@ -30,21 +30,29 @@ def simulate_game(mcts_iterations: int = 1000) -> int:
     mcts_agent = MCTS(game)
     random_agent = RandomAgent(game)
 
+    agent = random.choice([1, -1])  # 1 for MCTS, -1 for random agent
+
     while not game.is_game_over():
-        if game.current_player == 1:  # MCTS's turn (Black)
+        if agent == 1:
             start_pos, moves = mcts_agent.get_best_move(iterations=mcts_iterations)
             game.make_move(start_pos, moves)
+            agent *= -1
         else:  # Random agent's turn (White)
             start_pos, moves = random_agent.get_move()
             if start_pos is None:
                 break  # No valid moves, game over
             game.make_move(start_pos, moves)
+            agent *= -1
 
     winner = game.get_winner()
+
+    with open (f"{filepath}.txt", 'w') as file:
+        
+        
     return winner  # 1 for MCTS win, -1 for random win, 0 for draw
 
 
-def evaluate_mcts_vs_random(num_simulations: int, mcts_iterations: int = 1000) -> None:
+def evaluate_mcts_vs_random(filepath: str, num_simulations: int, mcts_iterations: int = 1000) -> None:
     """Evaluates the MCTS agent against a random agent over multiple simulations.
 
     Args:
@@ -56,7 +64,7 @@ def evaluate_mcts_vs_random(num_simulations: int, mcts_iterations: int = 1000) -
     draws = 0
 
     for _ in tqdm(range(num_simulations), desc="Simulating games"):
-        result = simulate_game(mcts_iterations)
+        result = simulate_game(filepath, mcts_iterations)
         if result == 1:
             mcts_wins += 1
         elif result == -1:
@@ -72,4 +80,4 @@ def evaluate_mcts_vs_random(num_simulations: int, mcts_iterations: int = 1000) -
 
 if __name__ == "__main__":
     num_simulations = 100  # Set the number of simulations
-    evaluate_mcts_vs_random(num_simulations, mcts_iterations=1000)
+    evaluate_mcts_vs_random('exp1', num_simulations, mcts_iterations=100)
