@@ -46,9 +46,16 @@ def simulate_game(filepath: str, mcts_iterations: int = 1000) -> int:
 
     winner = game.get_winner()
 
-    with open (f"{filepath}.txt", 'w') as file:
+    with open(f"{filepath}.txt", 'w') as file:
+        # Save the final board state
+        file.write("Final Board State:\n")
+        file.write(str(game))
+        file.write("\n")
         
-        
+        # Save the game result
+        result_text = "MCTS Win" if winner == 1 else "Random Win" if winner == -1 else "Draw"
+        file.write(f"Game Result: {result_text}")
+
     return winner  # 1 for MCTS win, -1 for random win, 0 for draw
 
 
