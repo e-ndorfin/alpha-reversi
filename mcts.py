@@ -21,7 +21,7 @@ class MCTS:
     def __init__(self, game: CheckersGame):
         self.game = game  # NumPy checkers board defined in game.py
         self.exploration_arg = 1.414
-        self.state = '' 
+        self.state = ''  # Tracks which state is being executed right now
 
     def _select(self, node: Node) -> Node:
         """
@@ -178,16 +178,16 @@ class MCTS:
         for _ in range(iterations):
             self.simulation_loop(root)
 
-        log_tree(root)
-        save_tree_visualization(root, filename='mcts_tree')
+        # log_tree(root)
+        # save_tree_visualization(root, filename='mcts_tree')
 
         # If no children, return a random valid move
         if not root.children:
             return random.choice(self.game.get_valid_moves())
 
         # Choose child with highest visits == choosing child with highest UCT score
-        # for node in root.children:
-        #     print(node)
+        for node in root.children:
+            print(node)
 
         best_child = max(root.children, key=lambda child: child.visits)
         return best_child.move

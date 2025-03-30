@@ -1,5 +1,6 @@
 from game import CheckersGame
 from mcts import MCTS
+from timeit import default_timer as timer
 
 
 def get_human_move(game: CheckersGame) -> tuple:
@@ -23,7 +24,15 @@ def main():
     game = CheckersGame()
     mcts = MCTS(game)
 
-    self_play = (input("Self play? Y/N") == 'Y')
+    self_play = (input("Self play? Y/N").lower() == 'y')
+
+    ai1_iterations, ai2_iterations = 1000, 1000
+
+    if self_play:
+        ai1_iterations = int(input('How many iterations for first AI?'))
+        ai2_iterations = int(input('How many iterations for second AI?'))
+
+    curr = 1
 
     # Game loop
     while not game.is_game_over():
@@ -35,14 +44,27 @@ def main():
             if game.current_player == 1:  # Human plays as black
                 start_pos, moves = get_human_move(game)
             else:  # AI plays as white
+                start = timer()
                 print("AI is thinking...")
                 start_pos, moves = mcts.get_best_move(iterations=1000)
+                end = timer()
                 print(f"AI move: {start_pos} -> {moves}")
+                print(f"Took {round(end - start, 2)} seconds.")
         else:
             # Both players are AI
-            print("AI is thinking...")
-            start_pos, moves = mcts.get_best_move(iterations=1000)
-            print(f"AI move: {start_pos} -> {moves}")
+            start = timer()
+            if curr == 1:
+                print(f"{mcts.game.current_player} is thinking...")
+                start_pos, moves = mcts.get_best_move(iterations=ai1_iterations)
+                print(f"AI move: {start_pos} -> {moves}")
+                curr *= -1
+            elif curr == -1:
+                print(f"{mcts.game.current_player} is thinking...")
+                start_pos, moves = mcts.get_best_move(iterations=ai2_iterations)
+                print(f"AI move: {start_pos} -> {moves}")
+                curr *= -1
+            end = timer()
+            print(f"Took {round(end - start, 2)} seconds.")
 
         game.make_move(start_pos, moves)
 

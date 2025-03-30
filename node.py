@@ -11,6 +11,7 @@ class Node:
         self.value = 0.0       # Total value of this state
         self.player = None     # Player at this node (1 for black, -1 for white)
         self.move = None       # Move that led to this state (start_pos, moves)
+        self.moves_expanded = []  # Set of moves expanded so far
         # self.prior = prior  # Added prior probability from policy network
 
     def calculate_ucb_score(self, exploration_arg: float) -> float:
@@ -33,6 +34,18 @@ class Node:
                 + exploration_arg * \
                 np.sqrt(np.log(self.parent.visits) / self.visits)
 
+    def add_child(self, child: 'Node') -> None:
+        """Adds new child to children array"""
+
+        self.children.append(child)
+        # print(len(self.children))
+        # for child in self.children:
+        #     print(child.move)
+        # print(self.children)
+        if not child.parent:
+            child.parent = self
+
+
     def update(self, game_value: float) -> None:
         """Updates the visit and value count of the node while backpropagating.
 
@@ -43,12 +56,12 @@ class Node:
         self.visits += 1
         self.value += game_value
 
-    def __repr__(self):
-        """
-        Debugger pretty print node info
-        """
-        if hasattr(self, 'prior'):
-            prior = "{0:.2f}".format(self.prior)
-            return "{} Prior: {} Count: {} Value: {}".format(self.state.__str__(), prior, self.visits, self.value)
-        else:
-            return "Count: {} Value: {}".format(self.visits, self.value)
+    # def __repr__(self):
+    #     """
+    #     Debugger pretty print node info
+    #     """
+    #     if hasattr(self, 'prior'):
+    #         prior = "{0:.2f}".format(self.prior)
+    #         return "{} Prior: {} Count: {} Value: {}".format(self.state.__str__(), prior, self.visits, self.value)
+    #     else:
+    #         return "Count: {} Value: {}".format(self.visits, self.value)
