@@ -10,6 +10,7 @@ class CheckersGame:
     Attributes:
         - board (np.ndarray): An 8x8 numpy array representing the board state.
         - current_player (int): The current player (1 for black, -1 for white).
+        - moves_without_capture (int): Number of consecutive moves without a capture.
 
     Methods:
         - get_valid_moves() -> List[Tuple[Tuple[int, int], List[Tuple[int, int]]]]: Returns a list of valid moves.
@@ -28,10 +29,12 @@ class CheckersGame:
 
     board: np.ndarray
     current_player: int
+    moves_without_capture: int
 
     def __init__(self):
         self.board = np.zeros((8, 8), dtype=int)
         self.current_player = 1  # 1 for black, -1 for white
+        self.moves_without_capture = 0  # Counter for moves without capture
 
         self._initialize_board()
 
@@ -156,6 +159,7 @@ class CheckersGame:
         """Make a move or sequence of captures"""
         row, col = start_pos
         piece = self.board[row][col]
+        capture_made = False
 
         # Move the piece through the sequence
         self.board[row][col] = 0
@@ -166,6 +170,7 @@ class CheckersGame:
                 jumped_row = (new_row + row) // 2
                 jumped_col = (new_col + col) // 2
                 self.board[jumped_row][jumped_col] = 0
+                capture_made = True
 
             # LAST MOVE
             if i == len(moves) - 1:  # Final position
@@ -177,14 +182,22 @@ class CheckersGame:
                 self.board[new_row][new_col] = piece
             row, col = new_row, new_col
 
+        # Update moves without capture counter
+        if capture_made:
+            self.moves_without_capture = 0
+        else:
+            self.moves_without_capture += 1
+
         self.current_player *= -1  # Switch players
 
     def is_game_over(self) -> bool:
-        return len(self.get_valid_moves()) == 0
+        return len(self.get_valid_moves()) == 0 or self.moves_without_capture >= 50
 
     def get_winner(self) -> Optional[int]:
         if not self.is_game_over():
             return None
+        if self.moves_without_capture >= 50:
+            return 0  # Draw
         return -self.current_player  # Previous player won
 
     def get_state(self) -> np.ndarray:
