@@ -1,3 +1,7 @@
+possible investigations 
+- uct score change to number of opponents / self pieces left? instead of -1, 1, 0 for win/loss 
+
+
 # AlphaCheckers Development Roadmap
 
 ## Phase 1: Core Game Implementation
