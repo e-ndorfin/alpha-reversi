@@ -186,8 +186,8 @@ class MCTS:
             return random.choice(self.game.get_valid_moves())
 
         # Choose child with highest visits == choosing child with highest UCT score
-        for node in root.children:
-            print(node)
+        # for node in root.children:
+        #     print(node)
 
         best_child = max(root.children, key=lambda child: child.visits)
         return best_child.move

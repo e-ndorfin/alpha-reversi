@@ -4,6 +4,7 @@ from game import CheckersGame
 from mcts import MCTS
 from timeit import default_timer as timer
 from tqdm import tqdm
+from datetime import datetime
 
 class RandomAgent:
     """A simple random agent for playing Checkers."""
@@ -46,7 +47,7 @@ def simulate_game(filepath: str, mcts_iterations: int = 1000) -> int:
 
     winner = game.get_winner()
 
-    with open(f"{filepath}.txt", 'w') as file:
+    with open(f"{filepath}.txt", 'a') as file:
         # Save the final board state
         file.write("Final Board State:\n")
         file.write(str(game))
@@ -54,7 +55,7 @@ def simulate_game(filepath: str, mcts_iterations: int = 1000) -> int:
         
         # Save the game result
         result_text = "MCTS Win" if winner == 1 else "Random Win" if winner == -1 else "Draw"
-        file.write(f"Game Result: {result_text}")
+        file.write(f"Game Result: {result_text}\n")
 
     return winner  # 1 for MCTS win, -1 for random win, 0 for draw
 
@@ -70,7 +71,13 @@ def evaluate_mcts_vs_random(filepath: str, num_simulations: int, mcts_iterations
     random_wins = 0
     draws = 0
 
-    for _ in tqdm(range(num_simulations), desc="Simulating games"):
+    curr_date = datetime.now()
+
+    with open(f"{filepath}.txt", 'a') as file:
+        file.write("======================================\n")
+        file.write(f"{curr_date}\n")
+
+    for num_games_so_far in tqdm(range(num_simulations), desc="Simulating games"):
         result = simulate_game(filepath, mcts_iterations)
         if result == 1:
             mcts_wins += 1
@@ -79,12 +86,23 @@ def evaluate_mcts_vs_random(filepath: str, num_simulations: int, mcts_iterations
         else:
             draws += 1
 
+        with open(f"{filepath}.txt", 'a') as file:
+            file.write(f"MCTS wins: {mcts_wins} ({(mcts_wins / (num_games_so_far + 1)) * 100:.2f}%) \n")
+
     print(f"Results after {num_simulations} simulations:")
     print(f"MCTS Wins: {mcts_wins} ({(mcts_wins / num_simulations) * 100:.2f}%)")
     print(f"Random Wins: {random_wins} ({(random_wins / num_simulations) * 100:.2f}%)")
     print(f"Draws: {draws} ({(draws / num_simulations) * 100:.2f}%)")
 
+    with open(f"{filepath}.txt", "a") as file:
+        file.write(f"\n \n {curr_date} to {datetime.now()}\n")
+        file.write(f"Results after {num_simulations} simulations:\n")
+        file.write(f"MCTS Wins: {mcts_wins} ({(mcts_wins / num_simulations) * 100:.2f}%)\n")
+        file.write(f"Random Wins: {random_wins} ({(random_wins / num_simulations) * 100:.2f}%)\n")
+        file.write(f"Draws: {draws} ({(draws / num_simulations) * 100:.2f}%)\n")
+
+
 
 if __name__ == "__main__":
-    num_simulations = 100  # Set the number of simulations
+    num_simulations = 10  # Set the number of simulations
     evaluate_mcts_vs_random('exp1', num_simulations, mcts_iterations=100)
