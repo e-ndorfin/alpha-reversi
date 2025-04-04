@@ -2,7 +2,6 @@ possible investigations
 - uct score change to number of opponents / self pieces left? instead of -1, 1, 0 for win/loss
 
 urgent todo: 
-- [ ] fix game logic for captures
 - [ ] speedup mcts https://www.moderndescartes.com/essays/deep_dive_mcts/ through np optimizations
 
 # AlphaCheckers Development Roadmap
