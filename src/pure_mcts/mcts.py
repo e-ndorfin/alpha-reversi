@@ -2,9 +2,9 @@ from typing import Tuple, List, Optional, Union
 import numpy as np
 import random
 from copy import deepcopy
-from game import CheckersGame
-from node import Node
-from mcts_debug import *
+from pure_mcts.game import CheckersGame
+from pure_mcts.node import Node
+# from pure_mcts.mcts_debug import *
 
 
 class MCTS:
@@ -200,6 +200,7 @@ class MCTS:
             - root: The root node to start the simulation from
         """
         # Selection: traverse the tree to find a leaf node
+        # TODO: Make sure that this works correctly
         node = root
         while node.children:
             node = self._select(node)

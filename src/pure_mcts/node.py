@@ -4,12 +4,13 @@ import numpy as np
 
 class Node:
     def __init__(self, parent: Optional['Node'] = None):
-        self.state = None     # Board state as this node
+        self.state = None      # Board state of this node
         self.parent = parent   # Parent node
         self.children = []     # Legal child positions
         self.visits = 0        # Number of times this node has been visited
         self.value = 0.0       # Total value of this state
-        self.player = None     # Player at this node (1 for black, -1 for white)
+        # Player at this node (1 for black, -1 for white)
+        self.player = None
         self.move = None       # Move that led to this state (start_pos, moves)
         self.moves_expanded = []  # Set of moves expanded so far
         # self.prior = prior  # Added prior probability from policy network
@@ -44,7 +45,6 @@ class Node:
         # print(self.children)
         if not child.parent:
             child.parent = self
-
 
     def update(self, game_value: float) -> None:
         """Updates the visit and value count of the node while backpropagating.
