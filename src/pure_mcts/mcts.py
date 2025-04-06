@@ -2,9 +2,9 @@ from typing import Tuple, List, Optional, Union
 import numpy as np
 import random
 from copy import deepcopy
-from pure_mcts.game import CheckersGame
-from pure_mcts.node import Node
-# from pure_mcts.mcts_debug import *
+from game import CheckersGame
+from node import Node
+from mcts_debug import *
 
 
 class MCTS:
