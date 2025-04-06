@@ -2,6 +2,59 @@ import numpy as np
 from typing import List, Tuple, Optional
 from copy import deepcopy
 
+# TODO: edit this to make it numpy and similar to https://github.com/foersterrobert/AlphaZeroFromScratch/blob/main/4.AlphaMCTS.ipynb
+# https://www.youtube.com/watch?v=wuSQpLinRB4&ab_channel=freeCodeCamp.org
+
+
+class Checkers:
+    """
+    Methods: 
+    - [x] init 
+    - [x] get initial state 
+    - [ ] get next state (make move): state, action, player
+    - [ ] get valid moves: state
+    - [ ] check for win: state, action 
+    - [ ] terminated / end of game: state
+    - [ ] change perspective to opponent: state, player
+    - [ ] return encoded state: state
+    """
+
+    def __init__(self) -> None:
+        self.row_count = 8
+        self.column_count = 8
+        self.action_size = self.row_count * self.column_count
+
+        self.piece = 1
+        self.king = 2
+        self.opponent_piece = -1
+        self.opponent_king = -2
+
+    def get_initial_state(self) -> np.ndarray:
+        """Returns base state of the board as 8x8 numpy array."""
+
+        state = np.zeros((self.row_count, self.column_count))
+        # Black pieces (top)
+        state[0:3:2, 1::2] = self.opponent_piece
+        state[1, 0::2] = self.opponent_piece
+
+        # White pieces (bottom)
+        state[5::, 0::2] = self.piece
+        state[6::2, 1::2] = self.piece
+
+        return state
+
+    def check_legal_move(self, action) -> bool:
+        """Checks whether the action is within the game board."""
+        return
+
+    def get_next_state(self, state, action, player) -> np.ndarray:
+        """Returns next state of the board given a action."""
+        start_pos, end_pos = action
+        intermediate_pos = ((end_pos[0] - start_pos[0]) // 2 + start_pos[0],
+                            (end_pos[1] - start_pos[1]) // 2 + start_pos[1])
+
+        if state[intermediate_pos] != 0:  # Capture
+
 
 class CheckersGame:
     """
