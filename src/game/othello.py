@@ -4,9 +4,9 @@ from typing import Optional, Tuple, List
 
 class Othello:
     """
-    Othello class for action and observation space. 
+    Othello class for action and observation space.
 
-    Note: 
+    Note:
     - action defined as int from 0 to 63
     """
 
@@ -41,8 +41,16 @@ class Othello:
 
     def _is_valid_move(self, state: np.ndarray, action: int, player: int) -> bool:
         """Vectorized move validation using numpy operations"""
-        directions = [(0, 1), (0, -1), (1, 0), (-1, 0),
-                      (1, 1), (1, -1), (-1, 1), (-1, -1)]
+        directions = [
+            (0, 1),
+            (0, -1),
+            (1, 0),
+            (-1, 0),
+            (1, 1),
+            (1, -1),
+            (-1, 1),
+            (-1, -1),
+        ]
 
         row, col = action // 8, action % 8
         opponent = -player
@@ -52,7 +60,7 @@ class Othello:
 
         for i, (drow, dcol) in enumerate(directions):
             # Calculate maximum steps in this direction
-            steps = np.arange(1, max_steps+1)
+            steps = np.arange(1, max_steps + 1)
             rows = row + drow * steps
             cols = col + dcol * steps
 
@@ -67,22 +75,28 @@ class Othello:
             line = state[vrows, vcols]
 
             # Vectorized sequence checks
-            opponent_mask = (line == opponent)
-            player_mask = (line == player)
+            opponent_mask = line == opponent
+            player_mask = line == player
 
             # Find first non-opponent using cumulative product
             cum_opponent = np.cumprod(opponent_mask)
-            if cum_opponent[0] != 1:
+            if 1 not in (
+                cum_opponent[0],
+                cum_opponent[-1],
+            ):  # As long as the edge tile is not non-opponent..
                 continue
 
-            first_non_opponent = np.argmax(cum_opponent == 0) if np.any(
-                cum_opponent == 0) else len(line)
+            first_non_opponent = (
+                np.argmax(cum_opponent == 0) if np.any(cum_opponent == 0) else len(line)
+            )
 
             # Check conditions:
             # 1. At least one opponent piece exists
             # 2. First non-opponent is player
             # 3. No gaps in opponent sequence
-            if first_non_opponent > 0 and (first_non_opponent < len(line) and player_mask[first_non_opponent]):
+            if first_non_opponent > 0 and (
+                first_non_opponent < len(line) and player_mask[first_non_opponent]
+            ):
                 return True
 
         return False
@@ -109,8 +123,16 @@ class Othello:
         action_row, action_col = action // 8, action % 8
         new_state[action_row, action_col] = player
         opponent = -player
-        directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1),
-                      (0, 1), (1, -1), (1, 0), (1, 1)]
+        directions = [
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
+        ]
 
         for drow, dcol in directions:
             current_row, current_col = action_row + drow, action_col + dcol
@@ -132,10 +154,13 @@ class Othello:
 
     def check_terminated(self, state) -> bool:
         """Returns if no possible moves for either player."""
-        return (len(self.get_valid_moves(state, self.white_piece)) == 0 and len(self.get_valid_moves(state, self.black_piece)) == 0)
+        return (
+            len(self.get_valid_moves(state, self.white_piece)) == 0
+            and len(self.get_valid_moves(state, self.black_piece)) == 0
+        )
 
     def check_for_win(self, state, player) -> Optional[int]:
-        """Checks if player won. 1 for win, -1 for lose, 0 for draw."""
+        """Checks if player 1 won. 1 for win, -1 for lose, 0 for draw."""
         if self.check_terminated(state):
             count = state.sum() * player  # Calculates count for the player / opponent
             return np.sign(count)
@@ -145,14 +170,26 @@ class Othello:
     def get_encoded_state(self, state) -> np.ndarray:
         """Returns encoded state for the model."""
 
-        encoded_state = np.stack(
-            (state == -1, state == 0, state == 1)
-        ).astype(np.float32)
+        encoded_state = np.stack((state == -1, state == 0, state == 1)).astype(
+            np.float32
+        )
 
         return encoded_state
 
+    def change_perspective(self, state, player) -> np.ndarray:
+        """Flips the perspective of the board for the other player."""
+        return state * player
 
-if __name__ == '__main__':
+    def get_player(self, state, action) -> int:
+        """Returns which player this move belongs to."""
+        if not action:
+            return 1
+        else:
+            row, col = action // 8, action % 8
+            return state[row, col]
+
+
+if __name__ == "__main__":
     board = Othello()
     state = board.get_initial_state()
     moves = board.get_valid_moves(state, 1)
