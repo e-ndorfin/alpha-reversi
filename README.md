@@ -1,4 +1,4 @@
-# alpha-othello
+# alpha-reversi
 
 ## Running 
 Within base directory, run
