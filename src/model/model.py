@@ -7,6 +7,8 @@ class ResNet(nn.Module):
 	def __init__(self, game, num_resBlocks, num_hidden):
 		super().__init__()
 
+		self.device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+
 		self.startBlock = nn.Sequential(
 			nn.Conv2d(3, num_hidden, kernel_size=3, padding=1),  # kernel_size = 3 and padding = 1 to keep dimensions same 
 			nn.BatchNorm2d(num_hidden),
@@ -33,6 +35,8 @@ class ResNet(nn.Module):
 			nn.Linear(3 * game.row_count * game.column_count, 1),  # Finishing with 1 neuron 
 			nn.Tanh()
 		)
+
+		self.to(self.device)
 
 	def forward(self, x):
 		x = self.startBlock(x)
