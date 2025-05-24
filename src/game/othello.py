@@ -182,7 +182,7 @@ class Othello:
 
     def get_player(self, state, action) -> int:
         """Returns which player this move belongs to."""
-        if not action:
+        if not action:  # Edge case for no action (root)
             return 1
         else:
             row, col = action // 8, action % 8

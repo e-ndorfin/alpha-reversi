@@ -15,12 +15,14 @@ if __name__ == "__main__":
 
     args = {
         "C": 2,
-        "num_searches": 60,
+        "num_searches": 160,
         "num_iterations": 3,
-        "num_self_play_iterations": 500,
-        "num_epochs": 4,
-        "batch_size": 256,
-        "temperature": 1.25
+        "num_self_play_iterations": 3,
+        "num_epochs": 50,
+        "batch_size": 32,
+        "temperature": 1.25,
+        'dirichlet_epsilon': 0.25,
+        'dirichlet_alpha': 0.3
     }
 
     alphaZero = AlphaZero(model, optimizer, othello, args)
